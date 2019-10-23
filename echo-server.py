@@ -2,7 +2,7 @@
 
 import socket
 
-HOST = ''  
+HOST = ''
 PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 def main(argv=None):
