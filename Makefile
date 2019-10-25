@@ -15,12 +15,15 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: libaio socket_client_aio
+all: libaio socket_client_aio socket_client_sync
 
 libaio: libaio.o $(DEPS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 socket_client_aio: socket_aio.o $(DEPS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+socket_client_sync: socket_sync.o $(DEPS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean

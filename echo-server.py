@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: UTF-8 -*-
 
 import socket
 import sys
@@ -14,14 +15,15 @@ def main(argv=None):
         print("echo server is listen on port ",PORT)
         s.listen(5)
 
-        conn, addr = s.accept()
-        print('Connected by ', addr)
         while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            print("recv message: ", data)
-            conn.sendall(data)
+            conn, addr = s.accept()
+            print('Connected by ', addr)
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                print("recv message: ", data)
+                conn.sendall(data)
 
     except Exception, err:
         print err.message
