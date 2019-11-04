@@ -12,7 +12,7 @@
 #include <libaio.h>
 
 #define IO_NR 5
-
+// use libaio to implement echo client
 /*
  * usage: socket_aio <server_ip> <server_port>
 */
@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
 	}
 
 	//// use libaio to read socket 
-	/// 
-	/// 
+	////  only read once
+	//// 
 	io_prep_pread(&iocbs[0], sock_fd, (void *)recvbuf, sizeof(recvbuf), 0);
 	iocbs[0].data = (void *)recvbuf;
 	ios[0] = &iocbs[0];
