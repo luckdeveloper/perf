@@ -10,8 +10,6 @@ LIBS=-laio
 _DEPS = 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-
-
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
@@ -29,4 +27,4 @@ echo_client_sync: echo_client_sync.o $(DEPS)
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ 
+	-rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ ./*.o 
