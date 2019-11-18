@@ -13,7 +13,7 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: libaio echo_client_aio echo_client_sync echo_elient_epoll
+all: libaio echo_client_aio echo_client_sync echo_client_epoll
 
 libaio: libaio.o $(DEPS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)

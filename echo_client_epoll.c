@@ -11,25 +11,28 @@
 #include <sys/epoll.h>
 
 #define MAX_EVENTS 10
+#define INVALID_FD -1
 
-/*
- * usage: socket_aio <server_ip> <server_port>
+/* 
+ * every 5 seconds, send and recv from server 
+ * usage: socket_aio <server_ip> <server_port> 
+ *  
 */
 int main(int argc, char *argv[])
 {
-	int sock_fd;
+	int sock_fd = INVALID_FD;
 	struct sockaddr_in server;
 	int ret = 0;
 	int i = 0;
 
-	struct timespec timeout;
-	const char *msg = "hello";
 	char recvbuf[1024];
 
-	int efd;
+	// epoll 
+	int efd = INVALID_FD;
 	struct epoll_event event;
 	struct epoll_event events[MAX_EVENTS];
 
+	// for dfx
 	struct timeval tv;
 	struct tm* tm_info;
 	char timedisplay[50];
@@ -40,7 +43,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock_fd == -1)
+	if (sock_fd == INVALID_FD)
 	{
 		printf("socket failed\n");
 		return -1;
@@ -57,9 +60,10 @@ int main(int argc, char *argv[])
 		goto clean;
 
 	}
-
+////////////////////////////// 
+/// level triggered  
 	efd = epoll_create(MAX_EVENTS);
-	if (efd == -1)
+	if (efd == INVALID_FD)
 	{
 		printf("epoll_create failed");
 		goto clean;
@@ -70,7 +74,7 @@ int main(int argc, char *argv[])
 	epoll_ctl(efd, EPOLL_CTL_ADD, sock_fd, &event);
 
 	while (1) {
-		int n = 0;
+		int event_count = 0;
 		int i = 0;
 		struct epoll_event ev;
 
@@ -79,24 +83,28 @@ int main(int argc, char *argv[])
 		strftime(timedisplay, 50, "%Y:%m:%d %H:%M:%S", tm_info);
 		printf("%s\n", timedisplay);
 
-		n = epoll_wait(efd, events,  MAX_EVENTS, -1);
-		for (i = 0; i < n; i++)
+		event_count = epoll_wait(efd, events,  MAX_EVENTS, -1);
+		printf("event count : %d\n", event_count);
+
+		for (i = 0; i < event_count; i++)
 		{
 			if (events[i].events & EPOLLOUT)
 			{
-				int len = strlen(msg);
-				ret = send(events[i].data.fd, msg, len, 0);
+				int len = strlen(timedisplay);
+				ret = send(events[i].data.fd, timedisplay, len, 0);
 				if (ret == -1)
 				{
 					printf("send failed: %d\n", ret);
 					goto clean;
 				}
+				printf("send message: is %s\n", timedisplay);
 
+				#if 1
 				// add relevalt socket read event
 				ev.data.fd = events[i].data.fd;
 				ev.events = EPOLLIN;
 				epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &ev);
-
+				#endif 
 			}
 			else if (events[i].events & EPOLLIN)
 			{
@@ -108,10 +116,12 @@ int main(int argc, char *argv[])
 				}
 				printf("recv message: is %s\n", recvbuf);
 
+				#if 1
 				// add relevalt socket write event
 				ev.data.fd = events[i].data.fd;
 				ev.events = EPOLLOUT;
 				epoll_ctl(efd, EPOLL_CTL_MOD, events[i].data.fd, &ev);
+				#endif
 			}
 			else
 			{
@@ -124,10 +134,18 @@ int main(int argc, char *argv[])
 
 
 	close(sock_fd);
+	close(efd);
 	return 0;
 
 clean:
-	close(sock_fd);
+	if (sock_fd != INVALID_FD)
+	{
+		close(sock_fd);
+	}
+	if (efd != INVALID_FD)
+	{
+		close(efd);
+	}
 	return -1;
 }
 
